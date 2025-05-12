@@ -1,0 +1,13 @@
+alpaca-trade-api
+pandas
+matplotlib
+mplfinance
+transformers
+torch
+requests
+# Add these if you want to use lint/format:
+flake8
+black
+python-dotenv # If you plan to use .env files for API keys
+discord.py
+google-generativeai
