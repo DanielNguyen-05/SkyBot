@@ -28,7 +28,7 @@ try:
     model = genai.GenerativeModel('gemini-2.0-flash')
     logger.info("Đã kết nối thành công với Google Generative AI (Model: gemini-pro).")
 except Exception as e:
-    logger.exception(f"Lỗi nghiêm trọng khi cấu hình Google Generative AI: {e}") # logger.exception bao gồm cả traceback
+    logger.exception(f"Lỗi nghiêm trọng khi cấu hình Google Generative AI: {e}") 
     exit()
 
 # --- Cài đặt Intents cho Discord ---

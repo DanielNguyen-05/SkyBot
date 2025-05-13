@@ -4,7 +4,6 @@ import requests
 import pandas as pd
 from typing import Tuple
 
-# Thay bằng Google Gemini API key của bạn
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
 
