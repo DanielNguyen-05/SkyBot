@@ -5,9 +5,8 @@ mplfinance
 transformers
 torch
 requests
-# Add these if you want to use lint/format:
 flake8
 black
-python-dotenv # If you plan to use .env files for API keys
+python-dotenv 
 discord.py
 google-generativeai
