@@ -9,6 +9,8 @@ def get_data(api_key: str, api_secret: str, symbol: str, timeframe: str = "1Mont
 
     # Lấy dữ liệu và lưu vào dataframe
     bars = api.get_bars(symbol, timeframe=timeframe, start=start).df
+    bars.reset_index(inplace=True)        
+    bars.rename(columns={'timestamp': 'date'}, inplace=True)
     return bars
 
 def save_to_csv(dataframe: pd.DataFrame, symbol: str):
