@@ -3,6 +3,7 @@ import Plotting
 import Get_News
 import Sentiment_Analysis
 import LLMs_Advice
+import Forecast
 
 def main():
     # Nhập API_KEY, API_SECRET và tên cổ phiếu
@@ -26,6 +27,12 @@ def main():
     #Cho lời khuyên
     print("\n Lời khuyên từ AI:\n")
     print(advice)
+
+    #Forecast từ data
+    path = f"Data/{symbol}_du_lieu.csv"
+    forecast_df = Forecast.forecasting(path, column_name="close", periods=14)
+    Plotting.plot_forecast(forecast_df)
+    print(forecast_df.tail())
 
 if __name__ == "__main__":
     main()
