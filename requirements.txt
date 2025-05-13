@@ -10,3 +10,4 @@ black
 python-dotenv 
 discord.py
 google-generativeai
+prophet
