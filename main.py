@@ -4,6 +4,7 @@ import Get_News
 import Sentiment_Analysis
 import LLMs_Advice
 import Forecast
+import pandas as pd
 
 def main(alpaca_api_key, alpaca_api_secret, symbol):
     # Nhập API_KEY, API_SECRET và tên cổ phiếu

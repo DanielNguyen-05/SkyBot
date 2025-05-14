@@ -8,6 +8,8 @@ PIP = pip3
 SRC_FILES = $(wildcard *.py)
 # Generated data directory
 DATA_DIR = Data
+# Get a list of Git-tracked files in the data directory
+GIT_TRACKED_FILES := $(shell git ls-tree --full-tree -r HEAD:$(DATA_DIR) | awk '{print $$4}')
 
 # --- Tool Commands (Optional but recommended) ---
 # Install flake8 and black via pip if you want to use lint/format targets
@@ -28,22 +30,27 @@ install: requirements.txt
 	$(PIP) install -r requirements.txt
 	@echo ">>> Dependencies installed."
 
-# Run the main application script
+# Run the bot application script
 run:
-	@echo ">>> Running the main application (main.py)..."
+	@echo ">>> Running the main application (bot.py)..."
 	@echo "--- Make sure ALPACA_API_KEY, ALPACA_API_SECRET, and GEMINI_API_KEY environment variables are set, or be ready to input them ---"
-	$(PYTHON) main.py
+	$(PYTHON) bot.py
 
-# Clean up generated files and directories
+# Clean up generated files and directories (excluding Git-tracked files in Data)
 clean:
 	@echo ">>> Cleaning up generated files..."
 	@# Remove Python bytecode cache
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 	find . -type f -name "*.py[co]" -delete
-	@# Remove generated data directory (Use with caution!)
+	@# Clean Data directory (excluding Git tracked files)
+	@echo ">>> Cleaning $(DATA_DIR) (excluding Git tracked files)..."
 	@if [ -d "$(DATA_DIR)" ]; then \
-		echo ">>> Removing $(DATA_DIR) directory..."; \
-		rm -rf $(DATA_DIR); \
+		for file in $$(ls -A $(DATA_DIR)); do \
+			if [ -f "$(DATA_DIR)/$$file" ] && ! echo "$(DATA_DIR)/$$file" | grep -q -F -e "$$(echo $(GIT_TRACKED_FILES) | sed 's/ /\\n/g')"; then \
+				rm -f "$(DATA_DIR)/$$file"; \
+			fi; \
+		done; \
+		echo ">>> $(DATA_DIR) cleaned (excluding Git tracked files)."; \
 	else \
 		echo ">>> $(DATA_DIR) directory not found, nothing to remove."; \
 	fi
@@ -64,7 +71,7 @@ help:
 	@echo "Available commands:"
 	@echo "  make install    Install required Python packages from requirements.txt"
 	@echo "  make run        Run the main trading application (main.py)"
-	@echo "  make clean      Remove generated files (__pycache__, *.pyc, Data/)"
+	@echo "  make clean      Remove generated files (__pycache__, *.pyc, Data/ excluding Git tracked files)"
 	@echo "  make lint       Check code style using flake8 (requires flake8)"
 	@echo "  make format     Format code using black (requires black)"
 	@echo "  make help       Show this help message"
