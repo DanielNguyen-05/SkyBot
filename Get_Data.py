@@ -2,7 +2,7 @@ from alpaca_trade_api import REST
 import pandas as pd
 from datetime import datetime
 
-def get_data(alpaca_api_key: str, alpaca_api_secret: str, symbol: str, timeframe: str = "1Month", start: str = "2024-01-01"):
+def get_data(alpaca_api_key: str, alpaca_api_secret: str, symbol: str, timeframe: str = "1Day", start: str = "2025-05-01"):
     # Tạo kết nối với Alpaca API
     base_url = "https://paper-api.alpaca.markets"
     alpaca_api = REST(alpaca_api_key, alpaca_api_secret, base_url=base_url)
