@@ -11,7 +11,7 @@ GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemin
 def generate_prompt(df: pd.DataFrame, sentiment: str, probability: float) -> str:
     recent_data = df.tail(5).to_string(index=False)
     prompt = (
-        f"Bạn là SkyBot - chuyên gia phân tích đầu tư chứng khoán. Hãy đưa ra khuyến nghị ngắn gọn, sắc bén về mã cổ phiếu dựa trên:\n"
+        f"Bạn là SkyBot - chuyên gia phân tích đầu tư chứng khoán. Hãy đưa ra khuyến nghị sắc bén về mã cổ phiếu dựa trên:\n"
         f"- Dữ liệu 5 ngày gần nhất:\n{recent_data}\n"
         f"- Cảm xúc thị trường: {sentiment} (độ tin cậy {probability:.0%})\n\n"
         f"**Yêu cầu:**\n"
