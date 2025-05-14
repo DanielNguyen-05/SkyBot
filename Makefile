@@ -70,7 +70,7 @@ format:
 help:
 	@echo "Available commands:"
 	@echo "  make install    Install required Python packages from requirements.txt"
-	@echo "  make run        Run the main trading application (main.py)"
+	@echo "  make run        Run the main trading application (bot.py)"
 	@echo "  make clean      Remove generated files (__pycache__, *.pyc, Data/ excluding Git tracked files)"
 	@echo "  make lint       Check code style using flake8 (requires flake8)"
 	@echo "  make format     Format code using black (requires black)"
