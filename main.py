@@ -34,9 +34,19 @@ def main(alpaca_api_key, alpaca_api_secret, symbol):
 
     #Forecast từ data
     path = f"Data/{symbol}_du_lieu.csv"
-    forecast_df = Forecast.forecasting(path, column_name="close", periods=14)
-    Plotting.plot_forecast(forecast_df)
+    forecast_df = Forecast.forecasting(path, column_name="close", periods=7, future_only = True)
+
+    df = pd.read_csv(path)
+    if 'date' in df.columns:
+        df['ds'] = pd.to_datetime(df['date']).dt.tz_localize(None)
+    elif 'timestamp' in df.columns:
+        df['ds'] = pd.to_datetime(df['timestamp']).dt.tz_localize(None)
+    df['y'] = df['close'].astype(float)
+
+    Plotting.plot_forecast(forecast_df, df)
     print(forecast_df.tail())
+
+    #Plotting.plot_candlestick_from_csv(path, "Candlestick Chart", "Giá")
 
 if __name__ == "__main__":
     main()
