@@ -123,13 +123,15 @@ graph TD
 ## 📂 Các file quan trọng trong dự án
 
 **File** **Mô tả**
-bot.py Xử lý tương tác Discord, nhận lệnh và trả lời người dùng.
-main.py Luồng phân tích chính, điều phối các chức năng khác nhau (lấy dữ liệu, dự báo, phân tích cảm xúc, tạo lời khuyên).
-Forecast.py Chứa các hàm liên quan đến dự báo giá cổ phiếu bằng mô hình Prophet.
-Get_Data.py Chứa các hàm để lấy dữ liệu giá cổ phiếu và tin tức tài chính từ Alpaca Markets.
-LLMs_Advice.py Chứa các hàm để tạo lời khuyên đầu tư từ các mô hình ngôn ngữ lớn (LLMs) như Google Gemini AI.
-Plotting.py Chứa các hàm để tạo biểu đồ và hình ảnh trực quan từ dữ liệu.
-requirements.txt Liệt kê tất cả các thư viện Python cần thiết cho dự án. Sử dụng pip freeze > requirements.txt để tạo file này một cách dễ dàng.
+| **Tệp** | **Mô tả** |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`bot.py`** | Quản lý các tương tác với Discord bot, nhận lệnh từ người dùng và gửi phản hồi. |
+| **`main.py`** | Điều phối toàn bộ luồng phân tích: lấy dữ liệu, dự báo giá cổ phiếu, phân tích cảm xúc, và tạo lời khuyên đầu tư. |
+| **`Forecast.py`** | Xử lý các dự báo giá cổ phiếu bằng cách sử dụng thư viện **Prophet** (một công cụ mạnh mẽ dành cho phân tích chuỗi thời gian). |
+| **`Get_Data.py`** | Cung cấp các hàm để lấy dữ liệu giá cổ phiếu và tin tức tài chính từ nền tảng **Alpaca Markets**. |
+| **`LLMs_Advice.py`** | Chứa logic để tạo ra các lời khuyên đầu tư dựa trên **Mô hình ngôn ngữ lớn (LLMs)** như **Google Gemini AI**. |
+| **`Plotting.py`** | Chứa các hàm để tạo biểu đồ và hình ảnh minh họa từ dữ liệu tài chính nhằm giúp người dùng dễ dàng theo dõi và hiểu các kết quả phân tích. |
+| **`requirements.txt`**| Liệt kê các thư viện Python cần thiết cho dự án. Dễ dàng tạo bằng lệnh `pip freeze > requirements.txt`.
 
 ## 🚀 Hướng phát triển
 
