@@ -9,6 +9,7 @@ import asyncio
 import sys
 import io
 from contextlib import redirect_stdout, redirect_stderr
+import Forecast
 
 # --- Cấu hình Logging ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s:%(levelname)s:%(name)s: %(message)s')
@@ -76,26 +77,33 @@ async def run_main_with_output_capture(alpaca_api_key, alpaca_api_secret, symbol
             
             result = main(alpaca_api_key, alpaca_api_secret, symbol)
             
-        # Thu thập đầu ra
+        # Xử lý stdout/stderr 
         stdout_output = stdout_capture.getvalue()
         stderr_output = stderr_capture.getvalue()
         
-        # Kết hợp kết quả trả về và đầu ra terminal
-        combined_output = f"Kết quả từ phân tích cổ phiếu {symbol}:\n\n"
+        # Tạo nội dung tin nhắn
+        combined_output = f"Kết quả phân tích cổ phiếu {symbol}:\n\n"
+        combined_output += f"**Lời khuyên:**\n{result['advice']}\n\n"
         
-        if result:
-            combined_output += f"**Kết quả phân tích:**\n{result}\n\n"
-        
-        if stdout_output:
-            combined_output += f"**Thông tin cụ thể:**\n{stdout_output}\n"
-        
-        if stderr_output:
-            combined_output += f"**Cảnh báo/Lỗi:**\n```\n{stderr_output}\n```\n"
+        # Thêm metrics nếu có
+        if result['metrics']['mae']:
+            combined_output += f"\n**Độ chính xác:**\n"
+            combined_output += f"- MAE: {result['metrics']['mae']:.2f}\n"
+            combined_output += f"- RMSE: {result['metrics']['rmse']:.2f}\n"
+            combined_output += f"- MAPE: {result['metrics']['mape']:.2f}%\n"
             
-        return combined_output
+        # Trả về cả nội dung và đường dẫn ảnh
+        return {
+            "message": combined_output,
+            "image_path": result['image_path']
+        }
     
     except Exception as e:
-        return f"Lỗi khi chạy phân tích cổ phiếu: {str(e)}\n\nLỗi chi tiết:\n```\n{stderr_capture.getvalue()}\n```"
+        return {
+            "message": f"Lỗi khi chạy phân tích cổ phiếu: {str(e)}\n\nLỗi chi tiết:\n```\n{stderr_capture.getvalue()}\n```",
+            "image_path": None
+        }
+
 
 # --- Hàm gửi tin nhắn dài ---
 async def send_long_message(channel, text, mention=None): 
@@ -143,11 +151,12 @@ async def on_message(message: discord.Message):
         prompt_text = prompt_text.strip()
 
         if not prompt_text:
-            logger.info(f"Bot được tag nhưng không có câu hỏi từ {message.author.name}")
+            logger.debug(f"Bot được tag nhưng không có câu hỏi từ {message.author.name}")
             await message.reply(f"Chào {message.author.mention}, bạn gọi tôi có việc gì không? Hãy đặt câu hỏi nhé!", mention_author=False)
             return
 
-        if "cổ phiếu" in prompt_text.lower() or "dự đoán" in prompt_text.lower():
+        investment_keywords = ["cổ phiếu", "dự đoán", "đầu tư", "chứng khoán", "mã", "tài chính", "price", "stock", "invest"]
+        if any(keyword in prompt_text.lower() for keyword in investment_keywords):
             # async with message.channel.typing():
             def check(m):
                 return m.author == message.author and m.channel == message.channel
@@ -206,15 +215,35 @@ async def on_message(message: discord.Message):
                 processing_msg = await message.reply(f"{message.author.mention} Tôi đã nhận đủ thông tin cần thiết và đang phân tích dữ liệu cổ phiếu {symbol}. Vui lòng đợi trong giây lát...", mention_author=False)
                 
                 async with message.channel.typing():
-
                     result = await run_main_with_output_capture(alpaca_api_key, alpaca_api_secret, symbol)
+                    await send_long_message(message.channel, result["message"], mention=message.author.mention)
+
+                    if result["image_path"]:
+                        with open(result["image_path"], 'rb') as img_file:
+                            await message.channel.send(file=discord.File(img_file))
                     
                     # Cập nhật thông báo đang xử lý
                     await processing_msg.delete()
-                    
-                    max_length = 2000
-                    await send_long_message(message.channel, result, mention=message.author.mention)
 
+                    # Forecast data
+                    try:
+                        csv_path = f"Data/{symbol}_du_lieu.csv"
+                        forecast_df = Forecast.forecasting(csv_path, column_name="close", periods=7, future_only=True)
+
+                        forecast_output = f"\t\t\t\t\t📊 **Dự báo giá cổ phiếu {symbol} cho 7 ngày tới:** 📊\n"
+                        for index, row in forecast_df.iterrows():
+                            date = row['ds'].strftime('%Y-%m-%d')
+                            yhat = row['yhat']
+                            yhat_lower = row['yhat_lower']
+                            yhat_upper = row['yhat_upper']
+                            forecast_output += f"Ngày: {date}, Dự đoán: {yhat:.2f}, Khoảng tin cậy: ({yhat_lower:.2f} - {yhat_upper:.2f})\n"
+                        await send_long_message(message.channel, forecast_output, mention=None)
+                        await message.channel.send(f"{message.author.mention} **Lưu ý:** Đây chỉ là những khuyến nghị dựa trên dữ liệu hạn chế là những tin tức lấy được trên web về loại cổ phiếu của bạn. Bạn nên tự mình nghiên cứu thêm về công ty, ngành và các yếu tố vĩ mô có thể ảnh hưởng đến giá cổ phiếu")
+
+                    except Exception as e:
+                        error_message = f"Lỗi khi thực hiện dự báo: {str(e)}"
+                        logger.exception(error_message)
+                        await message.reply(f"{message.author.mention} {error_message}", mention_author=False)
 
             except Exception as e:
                 logger.exception(f"Lỗi khi chạy main.py: {e}")
