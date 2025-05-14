@@ -1,6 +1,5 @@
 # 📈 SkyBot - Trợ lý Đầu tư Thông minh trên Discord
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Python Version](https://img.shields.io/badge/Python-3.8+-blue.svg)
 ![Discord.py](https://img.shields.io/badge/Discord.py-v2.0+-blueviolet)
 
@@ -106,9 +105,10 @@ graph TD
     G --> I[Tổng hợp phân tích]
     H --> I
     I --> J[Trả kết quả]
-    style B fill:#f9f,stroke:#333,stroke-width:2px
-    style C fill:#ccf,stroke:#333,stroke-width:2px
-    style D fill:#ccf,stroke:#333,stroke-width:2px
+    style B fill:#a34,stroke:#222,stroke-width:2px
+    style C fill:#778,stroke:#222,stroke-width:2px
+    style D fill:#556,stroke:#222,stroke-width:2px
+
 
 ```
 
