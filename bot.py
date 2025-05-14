@@ -148,63 +148,65 @@ async def on_message(message: discord.Message):
             return
 
         if "cổ phiếu" in prompt_text.lower() or "dự đoán" in prompt_text.lower():
-            async with message.channel.typing():
-                def check(m):
-                    return m.author == message.author and m.channel == message.channel
+            # async with message.channel.typing():
+            def check(m):
+                return m.author == message.author and m.channel == message.channel
+            try:
+                await message.reply(f"{message.author.mention} SkyBot đã nhận được yêu cầu của bạn. Vui lòng cung cấp thông tin cần thiết.", mention_author=False)
+                await message.channel.send(f"{message.author.mention} Bạn muốn lấy tin tức từ trang Alpaca hay là một trang mới?", mention_author=False)
                 try:
-                    await message.reply(f"{message.author.mention} SkyBot đã nhận được yêu cầu của bạn. Vui lòng cung cấp thông tin cần thiết.", mention_author=False)
-                    await message.channel.send(f"{message.author.mention} Bạn muốn lấy tin tức từ trang Alpaca hay là một trang mới?", mention_author=False)
+                    new_message = await client.wait_for('message', timeout=30.0, check=check)
+                    new_response = new_message.content
+                except asyncio.TimeoutError:
+                    await message.channel.send(f"{message.author.mention} Đã hết thời gian chờ. Vui lòng thử lại.", mention_author=False)
+                    return
+                
+                if "alpaca" in new_response.lower():
+                    alpaca_api_key=os.getenv('ALPACA_API_KEY')
+                    alpaca_api_secret=os.getenv('ALPACA_API_SECRET')
+
+                else:
+                    # Hỏi về API KEY
+                    await message.channel.send(f"{message.author.mention} Vui lòng cho biết API Key của nơi bạn sẽ lấy tin tức của bạn:", mention_author=False)
                     try:
-                        new_message = await client.wait_for('message', timeout=30.0, check=check)
-                        new_response = new_message.content
-                    except asyncio.TimeoutError:
-                        await message.channel.send(f"{message.author.mention} Đã hết thời gian chờ. Vui lòng thử lại.", mention_author=False)
-                        return
-                    
-                    if "alpaca" in new_response.lower():
-                        alpaca_api_key=os.getenv('ALPACA_API_KEY')
-                        alpaca_api_secret=os.getenv('ALPACA_API_SECRET')
-
-                    else:
-                        # Hỏi về API KEY
-                        await message.channel.send(f"{message.author.mention} Vui lòng cho biết API Key của nơi bạn sẽ lấy tin tức của bạn:", mention_author=False)
+                        alpaca_api_key_message = await client.wait_for('message', timeout=30.0, check=check)
+                        alpaca_api_key = alpaca_api_key_message.content
+                        # Xóa tin nhắn chứa API key để bảo mật
                         try:
-                            alpaca_api_key_message = await client.wait_for('message', timeout=30.0, check=check)
-                            alpaca_api_key = alpaca_api_key_message.content
-                            # Xóa tin nhắn chứa API key để bảo mật
-                            try:
-                                await alpaca_api_key_message.delete()
-                            except:
-                                await message.channel.send("Không thể xóa tin nhắn chứa API key. Cân nhắc xóa thủ công để bảo mật.")
-                        except asyncio.TimeoutError:
-                            await message.channel.send(f"{message.author.mention} Đã hết thời gian chờ. Vui lòng thử lại.", mention_author=False)
-                            return
-
-                        # Hỏi về API SECRET
-                        await message.channel.send(f"{message.author.mention} Vui lòng cho biết API Secret của trang đó của bạn:", mention_author=False)
-                        try:
-                            alpaca_api_secret_message = await client.wait_for('message', timeout=30.0, check=check)
-                            alpaca_api_secret = alpaca_api_secret_message.content
-                            # Xóa tin nhắn chứa API secret để bảo mật
-                            try:
-                                await alpaca_api_secret_message.delete()
-                            except:
-                                await message.channel.send("Không thể xóa tin nhắn chứa API secret. Cân nhắc xóa thủ công để bảo mật.")
-                        except asyncio.TimeoutError:
-                            await message.channel.send(f"{message.author.mention} Đã hết thời gian chờ. Vui lòng thử lại.", mention_author=False)
-                            return
-
-                    # Hỏi về mã cổ phiếu
-                    await message.channel.send(f"{message.author.mention} Vui lòng cho biết mã cổ phiếu bạn muốn hỏi (ví dụ: AAPL):", mention_author=False)
-                    try:
-                        symbol_message = await client.wait_for('message', timeout=30.0, check=check)
-                        symbol = symbol_message.content.upper()  # Chuyển thành chữ hoa để thống nhất
+                            await alpaca_api_key_message.delete()
+                        except:
+                            await message.channel.send("Không thể xóa tin nhắn chứa API key. Cân nhắc xóa thủ công để bảo mật.")
                     except asyncio.TimeoutError:
                         await message.channel.send(f"{message.author.mention} Đã hết thời gian chờ. Vui lòng thử lại.", mention_author=False)
                         return
 
-                    processing_msg = await message.reply(f"{message.author.mention} Tôi đã nhận đủ thông tin cần thiết và đang phân tích dữ liệu cổ phiếu {symbol}. Vui lòng đợi trong giây lát...", mention_author=False)
-                    
+                    # Hỏi về API SECRET
+                    await message.channel.send(f"{message.author.mention} Vui lòng cho biết API Secret của trang đó của bạn:", mention_author=False)
+                    try:
+                        alpaca_api_secret_message = await client.wait_for('message', timeout=30.0, check=check)
+                        alpaca_api_secret = alpaca_api_secret_message.content
+                        # Xóa tin nhắn chứa API secret để bảo mật
+                        try:
+                            await alpaca_api_secret_message.delete()
+                        except:
+                            await message.channel.send("Không thể xóa tin nhắn chứa API secret. Cân nhắc xóa thủ công để bảo mật.")
+                    except asyncio.TimeoutError:
+                        await message.channel.send(f"{message.author.mention} Đã hết thời gian chờ. Vui lòng thử lại.", mention_author=False)
+                        return
+
+                # Hỏi về mã cổ phiếu
+                await message.channel.send(f"{message.author.mention} Vui lòng cho biết mã cổ phiếu bạn muốn hỏi (ví dụ: AAPL):", mention_author=False)
+                try:
+                    symbol_message = await client.wait_for('message', timeout=30.0, check=check)
+                    symbol = symbol_message.content.upper()  # Chuyển thành chữ hoa để thống nhất
+                except asyncio.TimeoutError:
+                    await message.channel.send(f"{message.author.mention} Đã hết thời gian chờ. Vui lòng thử lại.", mention_author=False)
+                    return
+
+                processing_msg = await message.reply(f"{message.author.mention} Tôi đã nhận đủ thông tin cần thiết và đang phân tích dữ liệu cổ phiếu {symbol}. Vui lòng đợi trong giây lát...", mention_author=False)
+                
+                async with message.channel.typing():
+
                     result = await run_main_with_output_capture(alpaca_api_key, alpaca_api_secret, symbol)
                     
                     # Cập nhật thông báo đang xử lý
@@ -214,9 +216,9 @@ async def on_message(message: discord.Message):
                     await send_long_message(message.channel, result, mention=message.author.mention)
 
 
-                except Exception as e:
-                    logger.exception(f"Lỗi khi chạy main.py: {e}")
-                    await message.reply(f"{message.author.mention} Xin lỗi, tôi gặp sự cố khi xử lý yêu cầu của bạn: {str(e)}", mention_author=False)
+            except Exception as e:
+                logger.exception(f"Lỗi khi chạy main.py: {e}")
+                await message.reply(f"{message.author.mention} Xin lỗi, tôi gặp sự cố khi xử lý yêu cầu của bạn: {str(e)}", mention_author=False)
         else:
             # Nếu không hỏi về cổ phiếu, sử dụng Gemini AI
             async with message.channel.typing():
